@@ -1,0 +1,30 @@
+### 
+
+GET http://localhost:8000/users HTTP/1.1
+
+
+### 
+
+POST http://localhost:8000/users HTTP/1.1
+
+{
+  "name": "test_name",
+  "fullname": "test_surname",
+  "nickname": "test_nick"
+}
+
+
+### 
+
+GET http://localhost:8000/users/add HTTP/1.1
+
+
+### 
+
+POST http://localhost:8000/users/add HTTP/1.1
+
+{
+  "name": "test_name",
+  "fullname": "test_surname",
+  "nickname": "test_nick"
+}

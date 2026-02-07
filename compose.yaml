@@ -1,0 +1,79 @@
+services:
+  # server:
+  #   build:
+  #     context: .
+  #   ports:
+  #     - 8000:8000
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+  db:
+    image: postgres:17
+    restart: always
+    user: postgres
+    command: >
+      postgres 
+      -c shared_preload_libraries='pg_stat_statements'
+      -c pg_stat_statements.track=all
+    volumes:
+      - db-data-1:/var/lib/postgresql/data
+      - ./init-db:/docker-entrypoint-initdb.d
+    environment:
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB=postgres
+    ports:
+      - 5432:5432
+    healthcheck:
+      test: ["CMD", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  db-admin:
+    image: dpage/pgadmin4
+    restart: always
+    ports:
+      - 8080:80
+    environment:
+      - PGADMIN_DEFAULT_EMAIL
+      - PGADMIN_DEFAULT_PASSWORD
+      - PGADMIN_CONFIG_SERVER_MODE=False
+      - PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED=False
+    volumes:
+      - db-admin-data:/var/lib/pgadmin
+    configs:
+      - source: db-admin-servers
+        target: /pgadmin4/servers.json
+      - source: db-admin-passfile
+        target: /pgadmin4/.pgpass
+        uid: "5050"
+        gid: "5050"
+        mode: 0600
+    depends_on:
+      db:
+        condition: service_healthy
+volumes:
+  db-data-1:
+    driver: local
+  db-admin-data:
+    driver: local
+configs:
+  db-admin-servers:
+    content: |
+      {
+      "Servers": {
+          "1": {
+              "Name": "db",
+              "Group": "Servers",
+              "Host": "db",
+              "Port": 5432,
+              "MaintenanceDB": "postgres",
+              "Username": "${POSTGRES_USER}",
+              "PassFile": "/pgadmin4/.pgpass",
+              "SSLMode": "prefer"
+          }
+        }
+      }
+  db-admin-passfile:
+    content: |
+      db:*:*:${POSTGRES_USER}:${POSTGRES_PASSWORD}
