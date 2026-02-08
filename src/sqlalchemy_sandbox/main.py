@@ -22,8 +22,7 @@ def create_users(db_name: str = "default"):
     u = User(**request_body.model_dump())
     with SqlUnitOfWork(db_name) as uow:
         uow.save(u)
-
-    return marshaling.User.model_validate(u.to_dict()).model_dump()
+        return marshaling.User.model_validate(u.to_dict()).model_dump()
 
 
 @app.get("/users/<db_name>")
@@ -31,5 +30,5 @@ def create_users(db_name: str = "default"):
 def get_users(db_name: str = "default"):
     with SqlUnitOfWork(db_name) as uow:
         users = uow.load_all(User)
-    users_list = [u.to_dict() for u in users]
+        users_list = [u.to_dict() for u in users]
     return marshaling.users.validate_python(users_list)

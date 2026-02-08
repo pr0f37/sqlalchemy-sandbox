@@ -25,7 +25,7 @@ def connection_strings():
     }
 
 
-sessions = {
+session_makers = {
     db: sessionmaker(create_engine(conn_string))
     for db, conn_string in connection_strings().items()
 }
